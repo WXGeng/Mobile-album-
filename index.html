@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum=scale=1.0,maximum-scale=1.0"/>
+		<script type="text/javascript">
+			 //获取设备的宽度
+			document.getElementsByTagName("html")[0].style.fontSize=document.documentElement.clientWidth/3+"px";
+			//
+		</script>
+		<style type="text/css">
+			html{
+				font-size:14px ;
+			}
+			*{
+				margin: 0px;
+				padding: 0px;
+			}
+			body{
+				font-size: 0.15rem;
+				background: #333;
+			}
+			a{
+				color: white;
+				text-decoration: none;
+				text-align: center;
+			}
+			header{
+				position: relative;
+				width: 3rem;
+				height: 0.45rem;
+				color: white;
+				text-align: center;
+				line-height: 0.45rem;
+			}
+			header a{
+				position: absolute;
+				top: 0.15rem;
+				width: 0.5rem;
+				height: 0.25rem;
+				box-shadow: 0 0 5px white;
+				line-height: 0.25rem;
+				border-radius: 5px;/*圆角*/
+			}
+			header a:nth-child(1){/*nth-child(1) 选择第一个a标签*/
+				display: none;
+				left: 15px;
+			}
+			header a:nth-child(2){
+				right: 15px;
+			}
+			section{
+				position: relative;
+			}
+			ul li{
+				list-style: none;
+				width: 1rem;
+				position: absolute;
+				height: 1rem;
+				background-size: 100% 100%;
+				border: 1px  solid cyan;/*如果是像素的话一行页面就放不了三个图片了*/
+				box-sizing: border-box;/*用到了CSS3的解析盒模型  可以把内容的盒模型给缩小1px*/
+				transition:left 0.5s,top 0.5s;/*CSS3动画过渡*/
+			}
+			footer{
+				position: fixed;
+				left: 0;
+				bottom: 0;
+				width: 3rem;
+				height: 0.45rem;
+				line-height: 0.45rem;
+				text-align: center;
+				background: #000;
+			}
+			footer a{
+				float: left;
+				width: 1.5rem;
+				height: 0.45rem;
+			}
+			footer a:nth-child(1){
+				border-right:1px solid white ;
+				background-image: ;
+				box-sizing: border-box;/*用到了CSS3的解析盒模型  可以把内容的盒模型给缩小1px*/
+			}
+			footer 
+		</style>
+	</head>
+	<body>
+		<!--
+			font-size默认字体大小为16px
+			em 相对单位长度  根据父节点的font-size:大小；设定的1em=font-size：大小px；  body父节点
+			rem 相对单位长度 根据根节点的font-size:大小；设定的1rem=font-size：大小px； html根节点 
+		-->
+		<header>
+			<a href="javascript:;" class="btn">删除</a><!--href="javascript:;是为了阻止页面自动跳转"-->
+			家庭相册
+			<a href="javascript:;" class="btn">选择</a>
+		</header>
+		<section>
+			<ul id="content">
+			</ul>
+		</section>
+		<footer>
+			<a href="javascript:;">手机相册</a><a href="javascript:;">所有相册</a>
+		</footer>
+		
+		<script type="text/javascript">
+			var removes=[]; //存储选中li的索引
+			//1添加图片文件
+			var oUl=document.getElementById("content");
+			var html='';
+			for (var i=1;i<=20;i++) {
+				html+="<li style='background-image:url(imges/"+i+".jpg)'></li>";
+			}
+			oUl.innerHTML=html;
+			//2改变定位布局
+			var aLi=oUl.getElementsByTagName("li");
+			var len=aLi.length;
+			position();
+			function position(){
+				for (var i=0,l=aLi.length;i<l;i++) {//省去一次计算 节省性能   var i=0;len=aLi.length;i<len;i++
+					aLi[i].style.left=i%3 +"rem";//计算每一行的三张图片的定位 00 01 02
+					aLi[i].style.top=Math.floor(i/3)+"rem";//向下取整Math.floor(i/3)+"rem"; 123除以3 <=1>0 456除以3 >=1 789除以3 3>=2
+				}
+			}
+			//选择按钮功能
+			var btn=document.getElementsByClassName("btn");
+			//给选择按钮监听触摸结束事件      模拟点击事件  常用冒泡 false冒泡,true捕获
+			btn[1].addEventListener("touchend",select,false);//相当于onclink 移动端的触摸
+			var mark=true;//定义一个开关来存储点击的状态
+			function select(){
+				if(mark){
+					btn[1].innerHTML="取消";
+					//mark=false;
+					//让每一个li拥有选中的功能
+					for(var i=0,l=aLi.length;i<l;i++){
+						aLi[i].index=i//给每一个li添加一个索引   方便删除获取值
+						aLi.onoff=true;//给每一个li添加一个自定义属性当作开关
+						aLi[i].addEventListener("touchend",selectLi,false);
+					}
+				}else{
+					btn[1].innerHTML="选择";
+					btn[0].style.display="none";
+					//mark=true;
+					for(var i=0,l=aLi.length;i<l;i++){
+						aLi[i].style.opacity=1;//如果是选择的话 透明度为1
+						//aLi[1].onoff=true;//添加一个自定义属性做开关
+						aLi[i].removeEventListener("touchend",selectLi,false);//移除监听事件
+					}
+					//方法三不需要清空索引数组
+					 removes.length=0;//清空要删除的索引数组   重新抓取；
+				}
+				mark =!mark;//开关取反
+			}
+			//4选择li的功能
+			function selectLi(){
+				if(this.onoff){
+					this.style.opacity=0.3;
+					btn[0].style.display="block";
+					removes.push(this.index);//抓取下标索引
+				}else{
+					this.style.opacity=1;
+					//删除取消选择的li索引
+					for(var i=0,l=removes.length;i<l;i++){
+						if(removes[i]==this.index){
+							removes.splice(i,1);//删除在i位置的一个元素
+						}
+					}
+				}
+				this.onoff=!this.onoff;
+			}
+			//5删除按钮的功能
+			btn[0].addEventListener("touchend",removeLi,false);
+			function removeLi(){
+				//console.log(removes);
+				//索引从大到小排序
+				//删除子元素li的方法如下    方法一
+				/*removes=removes.sort(function(a,b){
+					return b-a;
+				});
+				for (var i=0,l=removes.length;i<l;i++) {//删除节点要在父节点删除    只有父亲才能打儿子
+					oUl.removeChild(aLi[removes[i]]);//删除子元素   ul下面的li里面选中的索引
+					//从前往后下标每循环一次就是往前顶一下所以从后往前删除
+				}
+				*/
+				
+				//方法二
+				removes=removes.sort(function(a,b){
+					return a-b;
+				});
+				for (i=0,l=removes.length;i<l;i++) {
+					//removes.pop()删除并返回数组的最后一个长度
+					oUl.removeChild(aLi[removes.pop()]);
+				}
+				
+				//方法三
+				/*有bug
+				while(removes.length){//直接删除到没有
+					oUl.removeChild(aLi[removes.pop()]);
+				}*/
+				mark=false;
+				select();//取消功能
+				position();//再一次更新定位
+			}
+		</script>
+	</body>
+</html>
